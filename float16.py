@@ -1,6 +1,9 @@
 import math
 
-def to_ieee754_float16(x):
+
+def decimal_to_ieee(x):
+# def to_ieee754_float16(x):
+    #decimal to ieee
     # Handle zero
     if x == 0:
         return "0" * 16
@@ -45,7 +48,12 @@ def to_ieee754_float16(x):
 
     return f"{sign}{exponent_bits}{mantissa}"
 
-def ieee754_16_to_number(bits):
+
+
+def ieee_to_decimal(bits):
+#def ieee754_16_to_number(bits):
+#convert ieee to integer
+
     BIAS = 15
 
     # Extract fields
@@ -78,7 +86,9 @@ def ieee754_16_to_number(bits):
 
     return value
 
-def add_ieee754_16(a, b):
+def add_ieee(a, b):
+#add 2 ieee754 numbers
+
     BIAS = 15
 
     def decode(x):
@@ -171,51 +181,227 @@ def binary_multiplier(a, b):
     return result
 
 
-def binary_multiplier(a, b):
+def binary_to_ieee(bits):
+    """
+    Encode a binary string (like '101.11' or '-10.01') into IEEE754 FP16.
+    Returns 16-bit binary STRING.
+    """
 
-    # Binary adder (string-based)
-    def bin_add(x, y):
-        x = x.zfill(len(y))
-        y = y.zfill(len(x))
+    #convert binary to ieee standard
 
-        carry = 0
-        result = ""
+    bias = 15
 
-        for i in range(len(x) - 1, -1, -1):
-            s = carry + (x[i] == "1") + (y[i] == "1")
-            result = ("1" if s & 1 else "0") + result
-            carry = 1 if s > 1 else 0
+    # ---------------------------
+    # Handle sign
+    # ---------------------------
+    sign = 0
+    if bits[0] == "-":
+        sign = 1
+        bits = bits[1:]
 
-        if carry:
-            result = "1" + result
+    if "." not in bits:
+        bits += ".0"
 
-        return result.lstrip("0") or "0"
+    int_part, frac_part = bits.split(".")
 
-    # Shift-and-add multiplication
-    result = "0"
-    b_rev = b[::-1]
+    # Remove leading zeros
+    int_part = int_part.lstrip("0") or "0"
 
-    for i, bit in enumerate(b_rev):
-        if bit == "1":
-            shifted = a + "0" * i
-            result = bin_add(result, shifted)
+    # Zero case
+    if int_part == "0" and set(frac_part) == {"0"}:
+        return "0" * 16
+
+    # ---------------------------
+    # Normalize
+    # ---------------------------
+    if int_part != "0":
+        shift = len(int_part) - 1
+        mantissa_bits = int_part[1:] + frac_part
+    else:
+        first_one = frac_part.find("1")
+        shift = -(first_one + 1)
+        mantissa_bits = frac_part[first_one + 1:]
+
+    exponent = shift + bias
+
+    # ---------------------------
+    # Fraction (10 bits)
+    # ---------------------------
+    mantissa_bits += "0" * 20
+    fraction = mantissa_bits[:10]
+
+    # ---------------------------
+    # Assemble fields
+    # ---------------------------
+    exp_bits = format(exponent, "05b")
+
+    return str(sign) + exp_bits + fraction
+
+def float_to_fp16_binary(x):
+    """
+    Convert Python float to IEEE754 FP16 binary string.
+    Returns 16-bit string.
+    """
+
+    # Special cases
+    if math.isnan(x):
+        return "0111110000000001"
+    if math.isinf(x):
+        return "1111110000000000" if x < 0 else "0111110000000000"
+    if x == 0.0:
+        return "1" + "0"*15 if math.copysign(1, x) < 0 else "0"*16
+
+    sign = 0
+    if x < 0:
+        sign = 1
+        x = -x
+
+    bias = 15
+
+    # Normalize
+    exp = int(math.floor(math.log(x, 2)))
+    mant = x / (2 ** exp)
+
+    # Handle subnormals
+    if exp + bias <= 0:
+        frac = int(x / (2 ** (-14)) * (2 ** 10))
+        return str(sign) + "00000" + format(frac, "010b")
+
+    exponent = exp + bias
+
+    # Mantissa (remove implicit 1)
+    mant -= 1.0
+    frac = int(round(mant * (2 ** 10)))
+
+    # Handle rounding overflow
+    if frac == (1 << 10):
+        frac = 0
+        exponent += 1
+
+    # Overflow → infinity
+    if exponent >= 31:
+        return str(sign) + "11111" + "0"*10
+
+    return (
+        str(sign)
+        + format(exponent, "05b")
+        + format(frac, "010b")
+    )
+
+
+def fp16_to_binary_string(fp):
+    """
+    Convert IEEE754 FP16 binary string to standard binary string.
+    Example:
+        "0100000010110000" -> "101.11"
+    """
+
+    assert len(fp) == 16 and set(fp) <= {"0", "1"}
+
+    sign = fp[0]
+    exponent = int(fp[1:6], 2)
+    fraction = fp[6:]
+
+    bias = 15
+
+    # Special cases
+    if exponent == 31:
+        return "-inf" if sign == "1" else "inf"
+
+    if exponent == 0 and set(fraction) == {"0"}:
+        return "-0" if sign == "1" else "0"
+
+    # Build mantissa
+    if exponent == 0:
+        mantissa = "0." + fraction
+        shift = 1 - bias
+    else:
+        mantissa = "1." + fraction
+        shift = exponent - bias
+
+    bits = mantissa.replace(".", "")
+
+    # Shift binary point
+    if shift >= 0:
+        point = 1 + shift
+    else:
+        point = len(bits) + shift
+
+    # Pad if needed
+    if point >= len(bits):
+        bits += "0" * (point - len(bits))
+    elif point <= 0:
+        bits = "0" * (-point) + bits
+        point = 0
+
+    result = bits[:point] + "." + bits[point:]
+
+    # Cleanup
+    result = result.rstrip("0").rstrip(".")
+    if result.startswith("."):
+        result = "0" + result
+    if sign == "1":
+        result = "-" + result
 
     return result
 
+def mul_ieee(a, b):
+    assert len(a) == 16 and len(b) == 16
 
+    bias = 15
 
-# print(ieee754_16_to_number(to_ieee754_float16(0)))
-num1=5.75
-num2=2.25
+    sa, ea, fa = int(a[0]), int(a[1:6], 2), int(a[6:], 2)
+    sb, eb, fb = int(b[0]), int(b[1:6], 2), int(b[6:], 2)
 
-b1="1"
-b2="101"
+    # Zero shortcut
+    if (ea == 0 and fa == 0) or (eb == 0 and fb == 0):
+        return "0" * 16
 
-a=to_ieee754_float16(num1)
-b=to_ieee754_float16(num2)
-c = add_ieee754_16(a, b)
+    # Sign
+    sign = sa ^ sb
 
-print(binary_multiplier("1011", "1"))
+    # Restore mantissas (11 bits)
+    ma = (1 << 10) | fa
+    mb = (1 << 10) | fb
 
-print(f"{num1}+{num2}={ieee754_16_to_number(c)}")
-#print(f"{num1}*{num2}={ieee754_16_to_number(d)}")
+    # Exponent
+    exp = ea + eb - bias
+
+    # Multiply (22 bits)
+    prod = ma * mb
+
+    # Normalize
+    if prod & (1 << 21):
+        shift = 11
+        exp += 1
+    else:
+        shift = 10
+
+    # Extract with guard/round/sticky
+    mant = prod >> shift
+    remainder = prod & ((1 << shift) - 1)
+
+    guard = (remainder >> (shift - 1)) & 1
+    round_bit = (remainder >> (shift - 2)) & 1 if shift >= 2 else 0
+    sticky = 1 if (remainder & ((1 << (shift - 2)) - 1)) else 0
+
+    # Round to nearest
+    if guard and (round_bit or sticky or (mant & 1)):
+        mant += 1
+
+    # Mantissa overflow after rounding
+    if mant == (1 << 11):
+        mant >>= 1
+        exp += 1
+
+    frac = mant & 0x3FF
+
+    # Overflow
+    if exp >= 31:
+        return str(sign) + "11111" + "0" * 10
+
+    # Underflow (simple flush to zero)
+    if exp <= 0:
+        return "0" * 16
+
+    return str(sign) + format(exp, "05b") + format(frac, "010b")
