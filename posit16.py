@@ -426,3 +426,44 @@ def posit_mul(a: float, b: float, es: int):
         "prod_posit": pp_str,
         "prod_decimal": value
     }
+
+def mul(num1: float, num2: float, es: int = 1) -> float:
+    # --- decimal → posit bitstring ---
+    if es == 0:
+        p1_str = int_to_posit16_0(num1)
+        p2_str = int_to_posit16_0(num2)
+    else:
+        p1_str = int_to_posit16(num1, es)
+        p2_str = int_to_posit16(num2, es)
+
+    # --- bitstring → integer (hardware form) ---
+    p1 = int(p1_str, 2)
+    p2 = int(p2_str, 2)
+
+    # --- posit-domain multiply ---
+    p_prod = posit16_mul(p1, p2, es)
+
+    # --- back to decimal ---
+    return posit16_to_float(format(p_prod, "016b"), es)
+
+def add(num1: float, num2: float, es: int = 1) -> float:
+    # --- decimal → posit bitstring ---
+    if es == 0:
+        p1_str = int_to_posit16_0(num1)
+        p2_str = int_to_posit16_0(num2)
+    else:
+        p1_str = int_to_posit16(num1, es)
+        p2_str = int_to_posit16(num2, es)
+
+    # --- bitstring → integer (hardware form) ---
+    p1 = int(p1_str, 2)
+    p2 = int(p2_str, 2)
+
+    # --- posit-domain add ---
+    p_sum = posit16_add(p1, p2, es)
+
+    # --- back to decimal ---
+    return posit16_to_float(format(p_sum, "016b"), es)
+
+
+
