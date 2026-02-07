@@ -369,34 +369,45 @@ def posit16_mul(pa: int, pb: int, es: int) -> int:
 
     # --- special cases ---
     if sa is None or sb is None:
-        return 0x8000  # NaR
+        return 0x8000
     if ma == 0 or mb == 0:
         return 0
 
-    # --- sign ---
     sign = sa * sb
-
-    # --- scale add (posit multiplier core) ---
     k = ka + kb
 
-    # --- mantissa multiply ---
-    # ma, mb are Q1.16 → product is Q2.32
+    # Q1.16 × Q1.16 → Q2.32
     prod = ma * mb
 
-    # --- bring back toward Q1.16 ---
+    # ---- shift back to Q1.16 (CRITICAL FIX) ----
     m = prod >> 16
+    rem = prod & ((1 << 16) - 1)
 
-    # --- normalization (same style as adder) ---
+    # ---- guard + sticky ----
+    guard = (rem >> 15) & 1
+    sticky = 1 if (rem & ((1 << 15) - 1)) else 0
+
+    # ---- normalization ----
     if m >= (1 << 17):   # ≥ 2.0
         m >>= 1
         k += 1
 
-    while m < (1 << 15): # < 1.0
+    while m < (1 << 16): # < 1.0
         m <<= 1
         k -= 1
 
-    # --- encoder expects Q1.14 ---
+    # ---- round to nearest even ----
+    lsb = m & 1
+    if guard and (sticky or lsb):
+        m += 1
+        if m >= (1 << 17):
+            m >>= 1
+            k += 1
+
+    # encoder expects Q1.14
     return encode_posit16(sign, k, m >> 2, es)
+
+
 
 def posit_mul(a: float, b: float, es: int):
     # --- int → posit (BITSTRING) ---

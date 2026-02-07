@@ -11,7 +11,7 @@ class basic_functions:
             print("Enter a valid number system")
         self.type=a
     
-    def mul(self,a,b,es=0):
+    def mul(self,a,b,es):
         if self.type==1:
             return ps.mul(a,b,es)
         elif self.type==0:
