@@ -405,3 +405,14 @@ def mul_ieee(a, b):
         return "0" * 16
 
     return str(sign) + format(exp, "05b") + format(frac, "010b")
+
+
+def mul(num1,num2):
+    a=decimal_to_ieee(num1)
+    b=decimal_to_ieee(num2)
+    return float(ieee_to_decimal(mul_ieee(a,b)))
+
+def add(num1,num2):
+    a=decimal_to_ieee(num1)
+    b=decimal_to_ieee(num2)
+    return float(ieee_to_decimal(add_ieee(a,b)))

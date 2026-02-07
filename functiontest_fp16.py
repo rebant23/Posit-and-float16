@@ -14,6 +14,9 @@ c = fp.add_ieee(a, b)
 d=fp.mul_ieee(a,b)
 # print(binary_multiplier("1011", "1"))
 
-print(f"{num1}+{num2}={fp.ieee_to_decimal(c)}")
-print(f"{num1}*{num2}={fp.ieee_to_decimal(d)}")
+# print(f"{num1}+{num2}={fp.ieee_to_decimal(c)}")
+# print(f"{num1}*{num2}={fp.ieee_to_decimal(d)}")
 #print(fp.ieee)
+
+print(fp.mul_fp16(5.75,2.25))
+print(fp.add_fp16(5.75,2.25))
