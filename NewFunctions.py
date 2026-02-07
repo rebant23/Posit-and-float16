@@ -1,6 +1,6 @@
 from arithmetics import basic_functions
 
-fn=basic_functions("posit")
+fn=basic_functions("float")
 
 # print(fn.mul(5.75,2.25))
 # print(fn.add(5.75,2.25))
@@ -45,4 +45,4 @@ def exp(a):
         + mul(power(a, 8), 2.48015873015873e-05)
         
     )
-print(exp(3))
+print(exp(-8))

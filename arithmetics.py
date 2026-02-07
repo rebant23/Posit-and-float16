@@ -1,5 +1,6 @@
 import float16 as fp
 import posit16 as ps
+import math
 
 class basic_functions:
     def __init__(self,type1):
@@ -7,6 +8,8 @@ class basic_functions:
             a=1
         elif type1=="float":
             a=0
+        elif type1=="math":
+            a=2
         else:
             print("Enter a valid number system")
         self.type=a
@@ -16,6 +19,8 @@ class basic_functions:
             return ps.mul(a,b,es)
         elif self.type==0:
             return fp.mul(a,b)
+        elif self.type==2:
+            return a*b
         else:
             return BrokenPipeError
     
@@ -24,6 +29,8 @@ class basic_functions:
             return ps.add(a,b)
         elif self.type==0:
             return fp.add(a,b)
+        elif self.type==0:
+            return a+b
         else:
             return BrokenPipeError 
     
