@@ -407,7 +407,45 @@ def posit16_mul(pa: int, pb: int, es: int) -> int:
     # encoder expects Q1.14
     return encode_posit16(sign, k, m >> 2, es)
 
+def posit16_mul_es0(pa: int, pb: int) -> int:
+    sa, ka, ma = decode_posit16(pa, es=0)
+    sb, kb, mb = decode_posit16(pb, es=0)
 
+    # --- special cases ---
+    if sa is None or sb is None:
+        return 0x8000
+    if ma == 0 or mb == 0:
+        return 0
+
+    sign = sa * sb
+    k = ka + kb
+
+    # Q1.16 × Q1.16 → Q2.32
+    prod = ma * mb
+
+    # shift back to Q1.16
+    m = prod >> 16
+    rem = prod & 0xFFFF
+
+    # guard + sticky
+    guard = (rem >> 15) & 1
+    sticky = 1 if (rem & 0x7FFF) else 0
+
+    # ---- single-step normalization ONLY ----
+    if m >= (1 << 17):        # ≥ 2.0
+        m >>= 1
+        k += 1
+
+    # ---- round-to-nearest-even ----
+    lsb = m & 1
+    if guard and (sticky or lsb):
+        m += 1
+        if m >= (1 << 17):
+            m >>= 1
+            k += 1
+
+    # encoder expects Q1.14
+    return encode_posit16(sign, k, m >> 2, es=0)
 
 def posit_mul(a: float, b: float, es: int):
     # --- int → posit (BITSTRING) ---
@@ -422,9 +460,11 @@ def posit_mul(a: float, b: float, es: int):
     pa = int(pa_str, 2)
     pb = int(pb_str, 2)
 
-    # --- posit-domain multiply ---
-    pp = posit16_mul(pa, pb, es)
-
+    if es == 0:
+        pp = posit16_mul_es0(pa, pb)
+    else:
+        pp = posit16_mul(pa, pb, es)
+    
     # --- back to bitstring ---
     pp_str = format(pp, "016b")
 
