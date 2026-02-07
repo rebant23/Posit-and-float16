@@ -20,7 +20,7 @@ def softmax(arr):
     exp_vals = []
     for x in arr:
         exp_vals.append(nf.exp(x - m))
-        print(nf.exp(x-m))
+        #print(nf.exp(x-m))
     s=0
     for a in exp_vals:
         s=nf.add(s,a)
@@ -73,7 +73,7 @@ def hard_tanh(arr):
 def swish(arr):
     out = []
     for x in arr:
-        sig = 1.0 / nf.add((1.0,nf.exp(-x)))
+        sig = 1.0 / nf.add(1 ,nf.exp(-x))
         out.append(x * sig)
     return out
 

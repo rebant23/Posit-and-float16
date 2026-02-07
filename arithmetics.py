@@ -22,7 +22,7 @@ class basic_functions:
         elif self.type==2:
             return a*b
         else:
-            return BrokenPipeError
+            return a*b
     
     def add(self,a,b):
         if self.type==1:
@@ -32,5 +32,5 @@ class basic_functions:
         elif self.type==0:
             return a+b
         else:
-            return BrokenPipeError 
+            return a+b
     

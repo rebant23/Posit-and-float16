@@ -1,6 +1,6 @@
 from arithmetics import basic_functions
 
-fn=basic_functions("float")
+fn=basic_functions("math")
 
 # print(fn.mul(5.75,2.25))
 # print(fn.add(5.75,2.25))
@@ -8,7 +8,7 @@ fn=basic_functions("float")
 def mul(a,b,es=2):
     return fn.mul(a,b,es)
 
-def add(a,b):
+def add(a,b,es=0):
     return fn.add(a,b)
 
 def power(a, b):
@@ -31,7 +31,7 @@ def sin(a):
                         ),
                         mul(power(a, 9), 2.7557319223985893e-06)
                     )
-print(sin(1))
+#print(sin(1))
 def exp_taylor(a):
     return add(
         add(
@@ -61,9 +61,6 @@ def exp_taylor(a):
         ),
         0.0
     )
-<<<<<<< Updated upstream
-print(exp(-8))
-=======
 
 def exp(a):
     b = mul(a, 0.25)      # a / 4
@@ -73,5 +70,4 @@ def exp(a):
     return t
 
 
-print(exp(-3))
->>>>>>> Stashed changes
+#print(exp(-3))
