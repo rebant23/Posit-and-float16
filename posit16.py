@@ -1,4 +1,3 @@
-
 import math
 
 def int_to_posit16(n: int, es: int) -> str:
@@ -178,37 +177,77 @@ def posit16_to_float(p: str, es: int) -> float:
 
     return -value if neg else value
 
-print(posit16_to_float("1000110011100110", 0))
+print(posit16_to_float("0111111011010110", 0))
 
 def decode_posit16(p: int, es: int):
+    # 1. Handle Special Cases
     if p == 0:
-        return 0, 0, 0
+        return 0, 0, 0        # Zero
+    if p == 0x8000:
+        return None, None, None # NaR (Not a Real) / Infinity
 
+    # 2. Decode Sign & 2's Complement
     neg = (p & 0x8000) != 0
     if neg:
         p = (~p + 1) & 0xFFFF
+        # Note: In Python, 0x8000 would cause issues here if not handled above,
+        # but we already returned None for it.
 
+    # 3. Decode Regime
     i = 14
     rb = (p >> i) & 1
     run = 0
 
+    # Iterate while bits match the regime bit (rb)
     while i >= 0 and ((p >> i) & 1) == rb:
         run += 1
         i -= 1
 
     k = run - 1 if rb else -run
 
+    # 4. Skip Terminator (CRITICAL FIX)
+    # The loop ended because we hit a different bit (terminator) or ran out of bits.
+    # If we haven't run out of bits, we must skip the terminator.
+    if i >= 0:
+        i -= 1
+
+    # 5. Decode Exponent
     exp = 0
     if es > 0:
-        exp = (p >> (i - es + 1)) & ((1 << es) - 1)
-        i -= es
+        # Check if we actually have enough bits left for the exponent
+        if i >= 0:
+            # We want 'es' bits, but we might have fewer than 'es' remaining
+            # if the number is very small/large.
+            shift = max(0, i - es + 1)
+            bits_to_read = min(es, i + 1) # Read whatever fits
+
+            # Extract and align
+            exp = (p >> shift) & ((1 << bits_to_read) - 1)
+
+            # If we were forced to read fewer bits (run out of space),
+            # the standard says we treat missing LSBs as 0.
+            # The shift above naturally aligns MSBs correctly if we are careful.
+            # Actually, standard posit shifts exponent into place from the LEFT.
+            # If we only have 1 bit of exponent '1', and es=2, exp should be 2 (binary 10), not 1.
+            if bits_to_read < es:
+                 exp <<= (es - bits_to_read)
+
+            i -= es
+        else:
+            # No bits left for exponent, implies exp=0
+            exp = 0
 
     scale = k * (1 << es) + exp
 
-    frac_len = i + 1
-    frac = p & ((1 << frac_len) - 1)
+    # 6. Decode Mantissa
+    # Whatever is left is fraction
+    frac_len = max(0, i + 1)
+    frac = 0
+    if frac_len > 0:
+        frac = p & ((1 << frac_len) - 1)
 
-    # 🔥 Q1.16 fixed-point mantissa
+    # Normalize to Q1.16 (1.xxxxxxxxxxxxxxxx)
+    # We shift the fraction to the left to fill the 16 slots
     mantissa = (1 << 16) | (frac << (16 - frac_len))
 
     return (-1 if neg else 1), scale, mantissa
@@ -314,9 +353,9 @@ def posit_add_integers(a: int, b: int, es: int):
         "sum_integer": int(value)
     }
 
-es = 2
-a = 5
-b = 3
+es = 1
+a = 5.4343
+b = 3.5232
 
 r = posit_add_integers(a, b, es)
 
