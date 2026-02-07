@@ -1,11 +1,11 @@
 from arithmetics import basic_functions
 
-fn=basic_functions("posit")
+fn=basic_functions("float")
 
 # print(fn.mul(5.75,2.25))
 # print(fn.add(5.75,2.25))
 
-def mul(a,b,es=0):
+def mul(a,b,es=2):
     return fn.mul(a,b,es)
 
 def add(a,b):
@@ -14,7 +14,7 @@ def add(a,b):
 def power(a, b):
     result = 1.0
     for _ in range(b):
-        result = mul(result, a, 0)
+        result = mul(result, a)
     return result
 
 def sin(a):
@@ -22,14 +22,14 @@ def sin(a):
                         add(
                             add(
                                 add(
-                                    mul(power(a, 1), 1.0,0),
-                                    mul(power(a, 3), -0.16666666666666666,0)
+                                    mul(power(a, 1), 1.0),
+                                    mul(power(a, 3), -0.16666666666666666)
                                 ),
-                                mul(power(a, 5), 0.008333333333333333,0)
+                                mul(power(a, 5), 0.008333333333333333)
                             ),
-                            mul(power(a, 7), -0.0001984126984126984,0)
+                            mul(power(a, 7), -0.0001984126984126984)
                         ),
-                        mul(power(a, 9), 2.7557319223985893e-06,0)
+                        mul(power(a, 9), 2.7557319223985893e-06)
                     )
 print(sin(1))
 def exp(a):
