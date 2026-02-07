@@ -332,7 +332,7 @@ def posit16_add(pa: int, pb: int, es: int) -> int:
     return encode_posit16(sign, k, m >> 2, es)
     # >>2 drops guard bits back to Q1.14 for encoder
 
-def posit_add_integers(a: int, b: int, es: int):
+def posit_add(a: int, b: int, es: int):
     # --- int → posit (BITSTRING) ---
     if es == 0:
         pa_str = int_to_posit16_0(a)
@@ -362,14 +362,6 @@ def posit_add_integers(a: int, b: int, es: int):
         "sum_integer": int(value)
     }
 
-es = 1
-a = .05522
-b =0.52233
-
-r = posit_add_integers(a, b, es)
-
-for k, v in r.items():
-    print(k, ":", v)
 
 def posit16_mul(pa: int, pb: int, es: int) -> int:
     sa, ka, ma = decode_posit16(pa, es)
@@ -406,7 +398,7 @@ def posit16_mul(pa: int, pb: int, es: int) -> int:
     # --- encoder expects Q1.14 ---
     return encode_posit16(sign, k, m >> 2, es)
 
-def posit_mul_integers(a: float, b: float, es: int):
+def posit_mul(a: float, b: float, es: int):
     # --- int → posit (BITSTRING) ---
     if es == 0:
         pa_str = int_to_posit16_0(a)
@@ -435,11 +427,43 @@ def posit_mul_integers(a: float, b: float, es: int):
         "prod_decimal": value
     }
 
-es = 2
-a = 5.4343
-b = 3.5232
+def mul(num1: float, num2: float, es: int = 1) -> float:
+    # --- decimal → posit bitstring ---
+    if es == 0:
+        p1_str = int_to_posit16_0(num1)
+        p2_str = int_to_posit16_0(num2)
+    else:
+        p1_str = int_to_posit16(num1, es)
+        p2_str = int_to_posit16(num2, es)
 
-r = posit_mul_integers(a, b, es)
+    # --- bitstring → integer (hardware form) ---
+    p1 = int(p1_str, 2)
+    p2 = int(p2_str, 2)
 
-for k, v in r.items():
-    print(k, ":", v)
+    # --- posit-domain multiply ---
+    p_prod = posit16_mul(p1, p2, es)
+
+    # --- back to decimal ---
+    return posit16_to_float(format(p_prod, "016b"), es)
+
+def add(num1: float, num2: float, es: int = 1) -> float:
+    # --- decimal → posit bitstring ---
+    if es == 0:
+        p1_str = int_to_posit16_0(num1)
+        p2_str = int_to_posit16_0(num2)
+    else:
+        p1_str = int_to_posit16(num1, es)
+        p2_str = int_to_posit16(num2, es)
+
+    # --- bitstring → integer (hardware form) ---
+    p1 = int(p1_str, 2)
+    p2 = int(p2_str, 2)
+
+    # --- posit-domain add ---
+    p_sum = posit16_add(p1, p2, es)
+
+    # --- back to decimal ---
+    return posit16_to_float(format(p_sum, "016b"), es)
+
+
+
