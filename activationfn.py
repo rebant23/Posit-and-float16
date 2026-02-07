@@ -1,5 +1,6 @@
 import NewFunctions as nf
 import float16 as fp
+import math
 
 def relu_list(arr):
     out = []
@@ -13,8 +14,6 @@ def leaky_relu_list(arr, alpha=0.01):
         out.append(x if x >= 0 else nf.mul(alpha,x))
     return out
 
-import math
-
 def softmax(arr):
     # subtract max for numerical stability
     m = max(arr)
@@ -27,13 +26,17 @@ def softmax(arr):
         out.append(e / s)
     return out
 
-
-
+def exponential(arr):
+    out = []
+    for x in arr:
+        out.append(nf.exp(x))
+    return out
 
 
 
 data = [-3, -1, 0, 2, 5]
 print(f"Original data: {data}")
 print(f"Relu:{relu_list(data)}")
-print(f"Relu:{leaky_relu_list(data)}")
+print(f"Leaky Relu:{leaky_relu_list(data)}")
 print(f"Softmax:{softmax(data)}")
+print(f"Exponential:{exponential(data)}")
