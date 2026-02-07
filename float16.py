@@ -5,48 +5,53 @@ def decimal_to_ieee(x):
 # def to_ieee754_float16(x):
     #decimal to ieee
     # Handle zero
-    if x == 0:
+    if abs(x)< 0.002:
         return "0" * 16
+    elif math.isinf(x):
+        return "1"*16
 
-    # Sign bit
-    sign = 0
-    if x < 0:
-        sign = 1
-        x = abs(x)
+    else:
+        # Sign bit
+        sign = 0
+        if x < 0:
+            sign = 1
+            x = abs(x)
 
-    # Constants for float16
-    EXP_BITS = 5
-    MAN_BITS = 10
-    BIAS = 15
+        # Constants for float16
+        EXP_BITS = 5
+        MAN_BITS = 10
+        BIAS = 15
 
-    # Find exponent
-    exponent = int(math.floor(math.log2(x)))
-    normalized = x / (2 ** exponent)  # in [1,2)
+        # Find exponent
+        # print(f"number={x}")
+        exponent = int(math.floor(math.log2(x)))
+        # print(f"exponent={exponent}")
+        normalized = x / (2 ** exponent)  # in [1,2)
 
-    # Mantissa (remove leading 1)
-    frac = normalized - 1
+        # Mantissa (remove leading 1)
+        frac = normalized - 1
 
-    mantissa = ""
-    for _ in range(MAN_BITS):
-        frac *= 2
-        if frac >= 1:
-            mantissa += "1"
-            frac -= 1
-        else:
-            mantissa += "0"
+        mantissa = ""
+        for _ in range(MAN_BITS):
+            frac *= 2
+            if frac >= 1:
+                mantissa += "1"
+                frac -= 1
+            else:
+                mantissa += "0"
 
-    # Biased exponent
-    exp = exponent + BIAS
+        # Biased exponent
+        exp = exponent + BIAS
 
-    # Overflow / underflow handling (simple)
-    if exp <= 0:
-        return "0" * 16      # underflow → zero
-    if exp >= 31:
-        return f"{sign}11111" + "0"*10   # overflow → infinity
+        # Overflow / underflow handling (simple)
+        if exp <= 0:
+            return "0" * 16      # underflow → zero
+        if exp >= 31:
+            return f"{sign}11111" + "0"*10   # overflow → infinity
 
-    exponent_bits = format(exp, "05b")
+        exponent_bits = format(exp, "05b")
 
-    return f"{sign}{exponent_bits}{mantissa}"
+        return f"{sign}{exponent_bits}{mantissa}"
 
 
 
