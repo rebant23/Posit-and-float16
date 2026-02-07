@@ -25,4 +25,5 @@ class basic_functions:
         elif self.type==0:
             return fp.add(a,b)
         else:
-            return BrokenPipeError
+            return BrokenPipeError 
+    
