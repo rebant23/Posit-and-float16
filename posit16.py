@@ -332,7 +332,7 @@ def posit16_add(pa: int, pb: int, es: int) -> int:
     return encode_posit16(sign, k, m >> 2, es)
     # >>2 drops guard bits back to Q1.14 for encoder
 
-def posit_add_integers(a: int, b: int, es: int):
+def posit_add(a: int, b: int, es: int):
     # --- int → posit (BITSTRING) ---
     if es == 0:
         pa_str = int_to_posit16_0(a)
@@ -362,14 +362,6 @@ def posit_add_integers(a: int, b: int, es: int):
         "sum_integer": int(value)
     }
 
-es = 1
-a = .05522
-b =0.52233
-
-r = posit_add_integers(a, b, es)
-
-for k, v in r.items():
-    print(k, ":", v)
 
 def posit16_mul(pa: int, pb: int, es: int) -> int:
     sa, ka, ma = decode_posit16(pa, es)
@@ -406,7 +398,7 @@ def posit16_mul(pa: int, pb: int, es: int) -> int:
     # --- encoder expects Q1.14 ---
     return encode_posit16(sign, k, m >> 2, es)
 
-def posit_mul_integers(a: float, b: float, es: int):
+def posit_mul(a: float, b: float, es: int):
     # --- int → posit (BITSTRING) ---
     if es == 0:
         pa_str = int_to_posit16_0(a)
@@ -434,12 +426,3 @@ def posit_mul_integers(a: float, b: float, es: int):
         "prod_posit": pp_str,
         "prod_decimal": value
     }
-
-es = 2
-a = 5.4343
-b = 3.5232
-
-r = posit_mul_integers(a, b, es)
-
-for k, v in r.items():
-    print(k, ":", v)
