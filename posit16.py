@@ -70,7 +70,7 @@ def int_to_posit16(n: int, es: int) -> str:
 
     return format(final, "016b")
 
-print(int_to_posit16(5.5, 1))
+# print(int_to_posit16(5.5, 1))
 
 import math
 
@@ -123,7 +123,7 @@ def int_to_posit16_0(n: int) -> str:
         posit = format(val, "016b")
 
     return posit
-print(int_to_posit16_0(-5))
+# print(int_to_posit16_0(-5))
 
 def posit16_to_float(p: str, es: int) -> float:
     """
@@ -186,7 +186,7 @@ def posit16_to_float(p: str, es: int) -> float:
 
     return -value if neg else value
 
-print(posit16_to_float("0111111011010110", 0))
+# print(posit16_to_float("0111111011010110", 0))
 
 def decode_posit16(p: int, es: int):
     # 1. Handle Special Cases
