@@ -1,6 +1,7 @@
 import float16 as fp
 import posit16 as ps16
 import posit32 as ps32
+import posit8 as ps8
 import math
 
 class basic_functions:
@@ -13,6 +14,8 @@ class basic_functions:
             a=2
         elif type1=="posit32":
             a=3
+        elif type1=="posit8":
+            a=4
         else:
             print("Enter a valid number system")
         self.type=a
@@ -29,15 +32,15 @@ class basic_functions:
         else:
             return a*b
     
-    def add(self,a,b):
+    def add(self,a,b,es):
         if self.type==1:
-            return ps16.add(a,b)
+            return ps16.add(a,b,es)
         elif self.type==0:
             return fp.add(a,b)
         elif self.type==2:
             return a+b
         elif self.type==3:
-            return ps32.add(a,b)
+            return ps32.add(a,b,es)
         else:
             return a+b
     
