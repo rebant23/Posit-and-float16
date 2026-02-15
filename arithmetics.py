@@ -29,6 +29,8 @@ class basic_functions:
             return a*b
         elif self.type==3:
             return ps32.mul(a,b,es)
+        elif self.type==4:
+            return ps8.mul(a,b,es)
         else:
             return a*b
     
@@ -41,6 +43,8 @@ class basic_functions:
             return a+b
         elif self.type==3:
             return ps32.add(a,b,es)
+        elif self.type==4:
+            return ps8.add(a,b,es)
         else:
             return a+b
     

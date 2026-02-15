@@ -472,7 +472,7 @@ def mul(num1: float, num2: float, es: int = 1) -> float:
     p_prod = posit8_mul(p1, p2, es)
 
     # --- back to decimal ---
-    return posit8_to_float(format(p_prod, "016b"), es)
+    return posit8_to_float(format(p_prod, "08b"), es)
 
 def add(num1: float, num2: float, es: int = 1) -> float:
     # --- decimal → posit bitstring ---
@@ -491,5 +491,5 @@ def add(num1: float, num2: float, es: int = 1) -> float:
     p_sum = posit8_add(p1, p2, es)
 
     # --- back to decimal ---
-    return posit8_to_float(format(p_sum, "016b"), es)
+    return posit8_to_float(format(p_sum, "08b"), es)
 
