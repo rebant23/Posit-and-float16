@@ -272,4 +272,227 @@ def encode_posit32(sign, scale, mantissa, es):
 
     return posit
 
+def align(m, shift):
+    if shift <= 0:
+        return m
+    if shift >= 32:
+        return 1  # sticky only
 
+    sticky = 1 if (m & ((1 << shift) - 1)) else 0
+    return (m >> shift) | sticky
+
+def posit32_add(pa: int, pb: int, es: int) -> int:
+    sa, ka, ma = decode_posit32(pa, es)
+    sb, kb, mb = decode_posit32(pb, es)
+
+    # align scales
+    if ka > kb:
+        mb = align(mb, ka - kb)
+        k = ka
+    else:
+        ma = align(ma, kb - ka)
+        k = kb
+
+    # add mantissas
+    m = sa * ma + sb * mb
+    if m == 0:
+        return 0
+
+    sign = -1 if m < 0 else 1
+    m = abs(m)
+
+    # 🔥 normalization for Q1.32
+    if m >= (1 << 33):   # overflow (>= 2.0)
+        m >>= 1
+        k += 1
+
+    return encode_posit32(sign, k, m >> 2, es)
+    # >>2 drops guard bits back to Q1.30 for encoder
+
+def posit_add_32(a: int, b: int, es: int):
+
+    # --- int → posit (BITSTRING) ---
+    if es == 0:
+        pa_str = int_to_posit32_0(a)
+        pb_str = int_to_posit32_0(b)
+    else:
+        pa_str = int_to_posit32(a, es)
+        pb_str = int_to_posit32(b, es)
+
+    # --- convert bitstring → integer for hardware ---
+    pa = int(pa_str, 2)
+    pb = int(pb_str, 2)
+
+    # --- posit-domain hardware add ---
+    ps = posit32_add(pa, pb, es)
+
+    # --- convert result back to bitstring ---
+    ps_str = format(ps, "032b")
+
+    # --- decode for display ---
+    value = posit32_to_float(ps_str, es)
+
+    return {
+        "a_posit": pa_str,
+        "b_posit": pb_str,
+        "sum_posit": ps_str,
+        "sum_decimal": value,
+        "sum_integer": int(value)
+    }
+
+def posit32_mul(pa: int, pb: int, es: int) -> int:
+    sa, ka, ma = decode_posit32(pa, es)
+    sb, kb, mb = decode_posit32(pb, es)
+
+    # --- special cases ---
+    if sa is None or sb is None:
+        return 0x80000000
+    if ma == 0 or mb == 0:
+        return 0
+
+    sign = sa * sb
+    k = ka + kb
+
+    # Q1.32 × Q1.32 → Q2.64
+    prod = ma * mb
+
+    # ---- shift back to Q1.32 ----
+    m = prod >> 32
+    rem = prod & ((1 << 32) - 1)
+
+    # ---- guard + sticky ----
+    guard = (rem >> 31) & 1
+    sticky = 1 if (rem & ((1 << 31) - 1)) else 0
+
+    # ---- normalization ----
+    if m >= (1 << 33):   # ≥ 2.0
+        m >>= 1
+        k += 1
+
+    while m < (1 << 32):  # < 1.0
+        m <<= 1
+        k -= 1
+
+    # ---- round to nearest even ----
+    lsb = m & 1
+    if guard and (sticky or lsb):
+        m += 1
+        if m >= (1 << 33):
+            m >>= 1
+            k += 1
+
+    # encoder expects Q1.30
+    return encode_posit32(sign, k, m >> 2, es)
+
+def posit32_mul_es0(pa: int, pb: int) -> int:
+    sa, ka, ma = decode_posit32(pa, es=0)
+    sb, kb, mb = decode_posit32(pb, es=0)
+
+    # --- special cases ---
+    if sa is None or sb is None:
+        return 0x80000000
+    if ma == 0 or mb == 0:
+        return 0
+
+    sign = sa * sb
+    k = ka + kb
+
+    # Q1.32 × Q1.32 → Q2.64
+    prod = ma * mb
+
+    # shift back to Q1.32
+    m = prod >> 32
+    rem = prod & 0xFFFFFFFF
+
+    # guard + sticky
+    guard = (rem >> 31) & 1
+    sticky = 1 if (rem & 0x7FFFFFFF) else 0
+
+    # ---- single-step normalization ONLY ----
+    if m >= (1 << 33):
+        m >>= 1
+        k += 1
+
+    # ---- round-to-nearest-even ----
+    lsb = m & 1
+    if guard and (sticky or lsb):
+        m += 1
+        if m >= (1 << 33):
+            m >>= 1
+            k += 1
+
+    # encoder expects Q1.30
+    return encode_posit32(sign, k, m >> 2, es=0)
+
+def posit_mul_32(a: float, b: float, es: int):
+
+    # --- int → posit (BITSTRING) ---
+    if es == 0:
+        pa_str = int_to_posit32_0(a)
+        pb_str = int_to_posit32_0(b)
+    else:
+        pa_str = int_to_posit32(a, es)
+        pb_str = int_to_posit32(b, es)
+
+    # --- bitstring → integer ---
+    pa = int(pa_str, 2)
+    pb = int(pb_str, 2)
+
+    if es == 0:
+        pp = posit32_mul_es0(pa, pb)
+    else:
+        pp = posit32_mul(pa, pb, es)
+
+    # --- back to bitstring ---
+    pp_str = format(pp, "032b")
+
+    # --- decode for display ---
+    value = posit32_to_float(pp_str, es)
+
+    return {
+        "a_posit": pa_str,
+        "b_posit": pb_str,
+        "prod_posit": pp_str,
+        "prod_decimal": value
+    }
+
+def mul(num1: float, num2: float, es: int = 1) -> float:
+    # --- decimal → posit bitstring ---
+    if es == 0:
+        p1_str = int_to_posit32_0(num1)
+        p2_str = int_to_posit32_0(num2)
+    else:
+        p1_str = int_to_posit32(num1, es)
+        p2_str = int_to_posit32(num2, es)
+
+    # --- bitstring → integer (hardware form) ---
+    p1 = int(p1_str, 2)
+    p2 = int(p2_str, 2)
+
+    # --- posit-domain multiply ---
+    if es == 0:
+        p_prod = posit32_mul_es0(p1, p2)
+    else:
+        p_prod = posit32_mul(p1, p2, es)
+
+    # --- back to decimal ---
+    return posit32_to_float(format(p_prod, "032b"), es)
+
+def add(num1: float, num2: float, es: int = 1) -> float:
+    # --- decimal → posit bitstring ---
+    if es == 0:
+        p1_str = int_to_posit32_0(num1)
+        p2_str = int_to_posit32_0(num2)
+    else:
+        p1_str = int_to_posit32(num1, es)
+        p2_str = int_to_posit32(num2, es)
+
+    # --- bitstring → integer (hardware form) ---
+    p1 = int(p1_str, 2)
+    p2 = int(p2_str, 2)
+
+    # --- posit-domain add ---
+    p_sum = posit32_add(p1, p2, es)
+
+    # --- back to decimal ---
+    return posit32_to_float(format(p_sum, "032b"), es)
