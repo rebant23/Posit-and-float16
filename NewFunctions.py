@@ -1,6 +1,6 @@
 from arithmetics import basic_functions
 
-fn=basic_functions("math")
+fn=basic_functions("posit32")
 
 # print(fn.mul(5.75,2.25))
 # print(fn.add(5.75,2.25))
@@ -8,7 +8,7 @@ fn=basic_functions("math")
 def mul(a,b,es=2):
     return fn.mul(a,b,es)
 
-def add(a,b,es=0):
+def add(a,b):
     return fn.add(a,b)
 
 def power(a, b):
