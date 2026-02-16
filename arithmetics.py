@@ -1,4 +1,7 @@
 import float16 as fp
+import float8 as fp8
+import float32 as fp32
+import float64 as fp64
 import posit16 as ps16
 import posit32 as ps32
 import posit8 as ps8
@@ -19,6 +22,12 @@ class basic_functions:
             a=4
         elif type1=="posit64":
             a=5
+        elif type1=="float8":
+            a=6
+        elif type1=="float32":
+            a=7
+        elif type1=="float64":
+            a=8
         else:
             print("Enter a valid number system")
         self.type=a
@@ -36,6 +45,12 @@ class basic_functions:
             return ps8.mul(a,b,es)
         elif self.type==5:
             return ps64.mul(a,b,es)
+        elif self.type==6:
+            return fp8.mul(a,b)
+        elif self.type==7:
+            return fp32.mul(a,b)
+        elif self.type==8:
+            return fp64.mul(a,b)
         else:
             return a*b
     
@@ -52,6 +67,12 @@ class basic_functions:
             return ps8.add(a,b,es)
         elif self.type==5:
             return ps64.add(a,b,es)
+        elif self.type==6:
+            return fp8.add(a,b)
+        elif self.type==7:
+            return fp32.add(a,b)
+        elif self.type==8:
+            return fp64.add(a,b)
         else:
             return a+b
     
