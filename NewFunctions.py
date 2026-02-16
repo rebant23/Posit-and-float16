@@ -1,6 +1,6 @@
 from arithmetics import basic_functions
 
-fn=basic_functions("math")
+fn=basic_functions("posit32")
 
 # print(fn.mul(5.75,2.25))
 # print(fn.add(5.75,2.25))
@@ -71,3 +71,34 @@ def exp(a):
 
 
 #print(exp(-3))
+
+def dot(a, b, es=2):
+    if len(a) != len(b):
+        raise ValueError("Vectors must have same length")
+
+    result = 0.0
+    for x, y in zip(a, b):
+        result = add(result, mul(x, y, es), es)
+
+    return result
+
+def matvec(W, x):
+    out = []
+    for row in W:
+        out.append(dot(row, x))
+    return out
+
+W = [
+    [0.5, -1.0, 0.3],
+    [0.8, 0.2, -0.6]
+]
+
+x = [1.0, 2.0, -1.0]
+
+print(matvec(W, x))
+
+def vector_add(a, b):
+    if len(a) != len(b):
+        raise ValueError("Vectors must have same length")
+
+    return [add(x, y) for x, y in zip(a, b)]
