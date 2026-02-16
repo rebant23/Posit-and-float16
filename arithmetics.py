@@ -12,7 +12,7 @@ class basic_functions:
     def __init__(self,type1):
         if type1=="posit16":
             a=1
-        elif type1=="float":
+        elif type1=="float16":
             a=0
         elif type1=="math":
             a=2
@@ -30,6 +30,7 @@ class basic_functions:
             a=8
         else:
             print("Enter a valid number system")
+        print(f"Selected mode: {type1}")
         self.type=a
     
     def mul(self,a,b,es):

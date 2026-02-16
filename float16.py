@@ -9,6 +9,8 @@ def decimal_to_ieee(x):
         return "0" * 16
     elif math.isinf(x):
         return "1"*16
+    elif math.isnan(x):
+        return "0" * (BIAS+1)
 
     else:
         # Sign bit

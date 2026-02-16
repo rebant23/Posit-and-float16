@@ -16,6 +16,8 @@ def decimal_to_ieee(x):
         return "0" * (BIAS+1)
     elif math.isinf(x):
         return "1"*(BIAS+1)
+    elif math.isnan(x):
+        return "0" * (BIAS+1)
 
     else:
         # Sign bit
@@ -232,6 +234,6 @@ def add(num1,num2):
     b=decimal_to_ieee(num2)
     return float(ieee_to_decimal(add_ieee(a,b)))
 
-print(ieee_to_decimal(decimal_to_ieee(10)))
-print(ieee_to_decimal(mul_ieee(decimal_to_ieee(5.75),decimal_to_ieee(0.25))))
-print(ieee_to_decimal(add_ieee(decimal_to_ieee(5.3425),decimal_to_ieee(2.654))))
+# print(ieee_to_decimal(decimal_to_ieee(10)))
+# print(ieee_to_decimal(mul_ieee(decimal_to_ieee(5.75),decimal_to_ieee(0.25))))
+# print(ieee_to_decimal(add_ieee(decimal_to_ieee(5.3425),decimal_to_ieee(2.654))))

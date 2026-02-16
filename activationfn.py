@@ -1,6 +1,23 @@
 import NewFunctions as nf
-import float16 as fp
 import math
+
+# nf.mode()
+
+def benchmarks(data_string,type):
+    nf.set_number_system(type)
+    # Testing Data
+    data = data_string
+    print(f"Original data: {data}")
+    print(f"Relu:{relu_list(data)}")
+    print(f"Leaky Relu:{leaky_relu_list(data)}")
+    print(f"Softmax:{softmax(data)}")
+    print(f"Exponential:{exponential(data)}")
+    print(f"Logistic Sigmoid:{logistic_sigmoid(data)}")
+    print(f"Hard Sigmoid:{hard_sigmoid(data)}")
+    print(f"Softstep:{softstep(data)}")
+    print(f"Hard tanh:{hard_tanh(data)}")
+    print(f"Swish:{swish(data)}")
+
 
 def relu_list(arr):
     out = []
@@ -27,7 +44,7 @@ def softmax(arr):
     # s = sum(exp_vals)
     out = []
     for e in exp_vals:
-        out.append(e / s)
+        out.append(nf.div(e, s))
     return out
 
 def exponential(arr):
@@ -39,7 +56,7 @@ def exponential(arr):
 def logistic_sigmoid(arr):
     out = []
     for x in arr:
-        out.append(1.0 / (1.0 + nf.exp(-x)))
+        out.append(nf.div(1.0, (1.0 + nf.exp(-x))))
     return out
 
 def hard_sigmoid(arr):
@@ -56,7 +73,7 @@ def hard_sigmoid(arr):
 def softstep(arr):
     out = []
     for x in arr:
-        out.append(1.0 / nf.add(1.0, nf.exp(-x)))
+        out.append(nf.div(1.0, nf.add(1.0, nf.exp(-x))))
     return out
 
 def hard_tanh(arr):
@@ -73,19 +90,11 @@ def hard_tanh(arr):
 def swish(arr):
     out = []
     for x in arr:
-        sig = 1.0 / nf.add(1 ,nf.exp(-x))
-        out.append(x * sig)
+        sig = nf.div(1.0, nf.add(1 ,nf.exp(-x)))
+        out.append(nf.mul(x, sig))
     return out
 
 
-data = [-3, -1, 0, 2, 5]
-print(f"Original data: {data}")
-print(f"Relu:{relu_list(data)}")
-print(f"Leaky Relu:{leaky_relu_list(data)}")
-print(f"Softmax:{softmax(data)}")
-print(f"Exponential:{exponential(data)}")
-print(f"Logistic Sigmoid:{logistic_sigmoid(data)}")
-print(f"Hard Sigmoid:{hard_sigmoid(data)}")
-print(f"Softstep:{softstep(data)}")
-print(f"Hard tanh:{hard_tanh(data)}")
-print(f"Swish:{swish(data)}")
+# print(nf.log(2,10))
+# print(nf.ln(10))
+# print(nf.reciprocal(0.1))
