@@ -38,14 +38,17 @@ def softmax(arr):
     for x in arr:
         exp_vals.append(nf.exp(x - m))
         #print(nf.exp(x-m))
-    s=0
+    
+    s = 0
     for a in exp_vals:
-        s=nf.add(s,a)
+        s = nf.add(s, a)
     # s = sum(exp_vals)
+    
     out = []
     for e in exp_vals:
-        out.append(nf.div(e, s))
+        out.append(e / s)  # <- normal Python division
     return out
+
 
 def exponential(arr):
     out = []

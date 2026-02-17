@@ -1,5 +1,6 @@
 import NewFunctions as nf
 import activationfn as af
+import math
 
 # ----------------- Forward -----------------
 
@@ -39,20 +40,14 @@ def classifier(W, x, b):
 
 # ----------------- Loss -----------------
 
-def cross_entropy(pred, target, epsilon=1e-3):
-    """
-    Computes cross-entropy loss safely by ensuring predictions are positive
-    """
+def cross_entropy(pred, target):
+    epsilon = 1e-3   # changed from 1e-9
     loss = 0.0
-
-    # Clip predictions to ensure strictly positive values
-    pred_clipped = [max(p, epsilon) for p in pred]
-
-    for p, t in zip(pred_clipped, target):
-        if t == 1.0:
-            loss = nf.add(loss, -nf.ln(p))
-
+    for p, t in zip(pred, target):
+        if t == 1:
+            loss = nf.add(loss, -math.log(nf.add(p, epsilon)))
     return loss
+
 
 
 # ----------------- Gradients -----------------
