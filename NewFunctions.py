@@ -1,7 +1,7 @@
 from arithmetics import basic_functions
 
 
-GLOBAL_STR = "posit16"
+GLOBAL_STR = "posit64"
 
 def set_number_system(s):
     global GLOBAL_STR
