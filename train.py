@@ -8,7 +8,7 @@ import NewFunctions as nf
 # -----------------------------
 # Initialize arithmetic backend
 # -----------------------------
-nf.set_number_system("posit32")  # or "posit"
+nf.set_number_system("float16")  # or "posit"
 nf.mode()
 
 # -----------------------------
