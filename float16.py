@@ -5,6 +5,10 @@ def decimal_to_ieee(x):
 # def to_ieee754_float16(x):
     #decimal to ieee
     # Handle zero
+    EXP_BITS = 5
+    MAN_BITS = 10
+    BIAS = 15
+
     if abs(x)< 0.002:
         return "0" * 16
     elif math.isinf(x):
@@ -20,10 +24,7 @@ def decimal_to_ieee(x):
             x = abs(x)
 
         # Constants for float16
-        EXP_BITS = 5
-        MAN_BITS = 10
-        BIAS = 15
-
+        
         # Find exponent
         # print(f"number={x}")
         exponent = int(math.floor(math.log2(x)))

@@ -39,7 +39,7 @@ def classifier(W, x, b):
 
 # ----------------- Loss -----------------
 
-def cross_entropy(pred, target, epsilon=1e-8):
+def cross_entropy(pred, target, epsilon=1e-3):
     """
     Computes cross-entropy loss safely by ensuring predictions are positive
     """
@@ -113,7 +113,7 @@ def train_step(W, b, image, target, lr):
     pred = first_layer(W, x, b)
 
     # Clip predictions to avoid log(0) or negatives
-    pred = [max(p, 1e-8) for p in pred]
+    pred = [max(p, 1e-3) for p in pred]
 
     # Compute loss
     loss = cross_entropy(pred, target)
