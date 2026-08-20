@@ -26,16 +26,16 @@ def decimal_to_ieee(x):
             x = abs(x)
 
 
-        # Find exponent
-        # print(f"number={x}")
-        # print(x)
-        # print(math.log2(x))
+       
         exponent = int(math.floor(math.log2(x)))
         # print(f"exponent={exponent}")
         normalized = x / (2 ** exponent)  # in [1,2)
         # Mantissa (remove leading 1)
         frac = normalized - 1
-
+         # Find exponent
+        # print(f"number={x}")
+        # print(x)
+        # print(math.log2(x))
         mantissa = ""
         for _ in range(MAN_BITS):
             frac *= 2
