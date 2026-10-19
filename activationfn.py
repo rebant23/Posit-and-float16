@@ -17,6 +17,7 @@ def benchmarks(data_string,type):
     print(f"Softstep:{softstep(data)}")
     print(f"Hard tanh:{hard_tanh(data)}")
     print(f"Swish:{swish(data)}")
+    print(f"Reciprocal:{division(data)}")
 
 
 def relu_list(arr):
@@ -97,6 +98,11 @@ def swish(arr):
         out.append(nf.mul(x, sig))
     return out
 
+def division(arr):
+    out=[]
+    for x in arr:
+        out.append(nf.reciprocal(x))
+    return out
 
 # print(nf.log(2,10))
 # print(nf.ln(10))
